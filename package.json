@@ -1,7 +1,7 @@
 {
   "private": true,
   "displayName": "Sector Alarm Plugin",
-  "name": "sector-plugin",
+  "name": "homebridge-sector-plugin",
   "version": "1.0.0",
   "description": "A short description about what your plugin does.",
   "license": "Apache-2.0",
