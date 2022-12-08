@@ -1,4 +1,4 @@
-import { Service, PlatformAccessory, CharacteristicValue, Nullable, Logger } from 'homebridge';
+import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
 import { SectorAlarm } from './sector';
 import { DoorState } from './interfaces/DoorState';
 
@@ -37,9 +37,8 @@ export class DoorAccessory {
 
   async getCurrent(): Promise<CharacteristicValue> {
     this.platform.log.info(`Get current position: ${this.currentPosition}`);
-    const listOfLocks: Array<any> = this.sectorAlarm.getDoorStateSync();
+    const listOfLocks: Array<DoorState> = this.sectorAlarm.getDoorStateSync();
     const data: DoorState = listOfLocks[0];
-    console.log(data.Status);
 
     if (data.Status === 'unlock') {
       this.currentPosition = 100;

@@ -1,4 +1,4 @@
-import { Service, PlatformAccessory, CharacteristicValue, Nullable, Logger } from 'homebridge';
+import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
 import { SectorPlatform } from './platform';
 
 export class SecuritySystemAccessory {

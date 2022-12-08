@@ -1,10 +1,11 @@
 import fetch, { Headers } from 'sync-fetch';
 import * as jwt from 'jsonwebtoken';
 import { Sector } from './interfaces/Sector';
+import { DoorState } from './interfaces/DoorState';
 
 export class SectorAlarm {
   private baseUrl = 'https://mypagesapi.sectoralarm.net';
-  private headers: any = new Headers();
+  private headers: Headers = new Headers();
   private userId: string;
   private password: string;
   private lockSerial: string;
@@ -12,12 +13,12 @@ export class SectorAlarm {
   private panelId: string;
   private platform = 'web';
 
-  constructor(input: Sector) {
-    this.userId = input.userId;
-    this.password = input.password;
-    this.lockSerial = input.lockSerial;
-    this.panelCode = input.panelCode;
-    this.panelId = input.panelId;
+  constructor(sectorConfig: Sector) {
+    this.userId = sectorConfig.userId;
+    this.password = sectorConfig.password;
+    this.lockSerial = sectorConfig.lockSerial;
+    this.panelCode = sectorConfig.panelCode;
+    this.panelId = sectorConfig.panelId;
 
     this.setHeaders();
     if (this.headers['Authorization'] === undefined) {
@@ -56,6 +57,7 @@ export class SectorAlarm {
 
   private checkTokenValidity(): void {
     const decoded = jwt.decode(this.headers['Authorization'], { complete: true, json: true });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const payload = decoded?.payload as any;
     const dateNow = new Date('1970-01-01');
     dateNow.setSeconds(dateNow.getSeconds() + payload['exp']);
@@ -65,7 +67,7 @@ export class SectorAlarm {
     }
   }
 
-  public getDoorStateSync(): any {
+  public getDoorStateSync() {
     const url = `${this.baseUrl}/api/Panel/GetLockStatus?panelId=${this.panelId}`;
     const responseMessage = fetch(url, {
       method: 'GET',
