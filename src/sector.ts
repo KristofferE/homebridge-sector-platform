@@ -1,7 +1,6 @@
 import fetch, { Headers } from 'sync-fetch';
 import * as jwt from 'jsonwebtoken';
 import { Sector } from './interfaces/Sector';
-import { DoorState } from './interfaces/DoorState';
 
 export class SectorAlarm {
   private baseUrl = 'https://mypagesapi.sectoralarm.net';
