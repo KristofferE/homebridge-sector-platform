@@ -10,6 +10,36 @@
         "type": "string",
         "required": true,
         "default": "Example Dynamic Platform"
+      },
+      "userId": {
+        "title": "UserId",
+        "type": "string",
+        "required": true,
+        "default": "<your-email@address.com>"
+      },
+      "password": {
+        "title": "Password",
+        "type": "string",
+        "required": true,
+        "default": ""
+      },
+      "lockSerial": {
+        "title": "Lock Serial",
+        "type": "string",
+        "required": true,
+        "default": ""
+      },
+      "panelCode": {
+        "title": "Panel Code",
+        "type": "string",
+        "required": true,
+        "default": ""
+      },
+      "panelId": {
+        "title": "PanelId",
+        "type": "string",
+        "required": true,
+        "default": ""
       }
     }
   }
