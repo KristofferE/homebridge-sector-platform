@@ -1,6 +1,6 @@
 import fetch, { Headers } from 'sync-fetch';
 import * as jwt from 'jsonwebtoken';
-import { ISector } from './interfaces/ISector';
+import { Sector } from './interfaces/Sector';
 
 export class SectorAlarm {
   private baseUrl = 'https://mypagesapi.sectoralarm.net';
@@ -12,7 +12,7 @@ export class SectorAlarm {
   private panelId: string;
   private platform = 'web';
 
-  constructor(input: ISector) {
+  constructor(input: Sector) {
     this.userId = input.userId;
     this.password = input.password;
     this.lockSerial = input.lockSerial;
