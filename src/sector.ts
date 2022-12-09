@@ -1,13 +1,14 @@
 import fetch, { Headers } from 'sync-fetch';
 import * as jwt from 'jsonwebtoken';
-import { Sector } from './interfaces/Sector';
+import { Sector, Temperature, Door } from './interfaces/Sector';
+import { Device, AccessoryType } from './interfaces/Device';
 
 export class SectorAlarm {
   private baseUrl = 'https://mypagesapi.sectoralarm.net';
   private headers: Headers = new Headers();
   private userId: string;
   private password: string;
-  private lockSerial: string;
+  // private lockSerial: string; // Retreived by system automatically
   private panelCode: string;
   private panelId: string;
   private platform = 'web';
@@ -15,7 +16,7 @@ export class SectorAlarm {
   constructor(sectorConfig: Sector) {
     this.userId = sectorConfig.userId;
     this.password = sectorConfig.password;
-    this.lockSerial = sectorConfig.lockSerial;
+    // this.lockSerial = sectorConfig.lockSerial;
     this.panelCode = sectorConfig.panelCode;
     this.panelId = sectorConfig.panelId;
 
@@ -27,7 +28,7 @@ export class SectorAlarm {
     }
   }
 
-  private setHeaders() {
+  private setHeaders(): void {
     this.headers = {
       'API-Version': '6',
       'Platform': 'iOS',
@@ -38,7 +39,7 @@ export class SectorAlarm {
     };
   }
 
-  private getToken() {
+  private getToken(): void {
     const jsonData = {
       'UserId': this.userId,
       'Password': this.password,
@@ -66,16 +67,45 @@ export class SectorAlarm {
     }
   }
 
-  public getDoorStateSync() {
+  public getDevices(): Array<Device> {
+    const url = `${this.baseUrl}/api/Panel/GetPanel?${this.panelId}`;
+    const responseMessage = fetch(url, {
+      method: 'GET',
+      headers: this.headers,
+    });
+
+    const sectorData = responseMessage.json();
+    const locks: Array<Door> = sectorData['Locks'];
+    const temps: Array<Temperature> = sectorData['Temperatures'];
+
+    const devices: Array<Device> = new Array<Device>();
+    locks.map(lock => devices.push({
+      accessoryType: AccessoryType.DOOR,
+      serialNo: lock.Serial,
+      label: lock.Label,
+    }));
+
+    temps.map(temp => devices.push({
+      accessoryType: AccessoryType.TEMPERATURE,
+      serialNo: temp.SerialNo,
+      label: temp.Label,
+    }));
+
+    return devices;
+  }
+
+  public getDoorState(serialNo: string): Door | undefined {
     const url = `${this.baseUrl}/api/Panel/GetLockStatus?panelId=${this.panelId}`;
     const responseMessage = fetch(url, {
       method: 'GET',
       headers: this.headers,
     });
-    return responseMessage.json();
+    const doorStates: Array<Door> = responseMessage.json();
+    const door: Door | undefined = doorStates.find(door => door.Serial === serialNo);
+    return door;
   }
 
-  public unlockDoor() {
+  public unlockDoor(serialNo: string): void {
     this.checkTokenValidity();
     const url = `${this.baseUrl}/api/Panel/Unlock`;
 
@@ -84,7 +114,7 @@ export class SectorAlarm {
       headers: this.headers,
 
       body: JSON.stringify({
-        lockSerial: this.lockSerial,
+        lockSerial: serialNo,
         panelCode: this.panelCode,
         panelId: this.panelId,
         platform: this.platform,
@@ -93,7 +123,7 @@ export class SectorAlarm {
     });
   }
 
-  public lockDoor() {
+  public lockDoor(serialNo: string): void {
     this.checkTokenValidity();
     const url = `${this.baseUrl}/api/Panel/Lock`;
 
@@ -102,12 +132,24 @@ export class SectorAlarm {
       headers: this.headers,
 
       body: JSON.stringify({
-        lockSerial: this.lockSerial,
+        lockSerial: serialNo,
         panelCode: this.panelCode,
         panelId: this.panelId,
         platform: this.platform,
       }),
 
     });
+  }
+
+  public getTemperature(serialNo: string): Temperature | undefined {
+    this.checkTokenValidity();
+    const url = `${this.baseUrl}/api/Panel/GetTemperatures?panelId=${this.panelId}`;
+    const responseMessage = fetch(url, {
+      method: 'GET',
+      headers: this.headers,
+    });
+    const temperatures: Array<Temperature> = responseMessage.json();
+    const temp = temperatures.find(temp => temp.SerialNo === serialNo);
+    return temp;
   }
 }

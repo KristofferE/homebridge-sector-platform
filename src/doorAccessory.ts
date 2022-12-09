@@ -1,11 +1,13 @@
 import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
 import { SectorAlarm } from './sector';
-import { DoorState } from './interfaces/DoorState';
+import { Door, DoorStatus } from './interfaces/Sector';
 
 import { SectorPlatform } from './platform';
+import { Device } from './interfaces/Device';
 
 export class DoorAccessory {
   private service: Service;
+  private deviceInfo: Device;
   private currentPosition: CharacteristicValue = 10;
   private wantedPosition: CharacteristicValue | undefined;
 
@@ -14,7 +16,7 @@ export class DoorAccessory {
     private readonly accessory: PlatformAccessory,
     private readonly sectorAlarm: SectorAlarm,
   ) {
-
+    this.deviceInfo = accessory.context.device;
     // set accessory information
     this.accessory.getService(this.platform.Service.AccessoryInformation)!
       .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Tech-IT')
@@ -37,13 +39,14 @@ export class DoorAccessory {
 
   async getCurrent(): Promise<CharacteristicValue> {
     this.platform.log.info(`Get current position: ${this.currentPosition}`);
-    const listOfLocks: Array<DoorState> = this.sectorAlarm.getDoorStateSync();
-    const data: DoorState = listOfLocks[0];
+    const lock: Door | undefined = this.sectorAlarm.getDoorState(this.deviceInfo.serialNo);
 
-    if (data.Status === 'unlock') {
-      this.currentPosition = 100;
-    } else {
-      this.currentPosition = 0;
+    if (lock) {
+      if (lock.Status === DoorStatus.OPEN) {
+        this.currentPosition = 100;
+      } else {
+        this.currentPosition = 0;
+      }
     }
     return this.currentPosition;
   }
@@ -60,10 +63,10 @@ export class DoorAccessory {
   async setTarget(value: CharacteristicValue) {
     this.platform.log.info(`Set target position: ${value}`);
     if (value > 0) {
-      this.sectorAlarm.unlockDoor();
+      this.sectorAlarm.unlockDoor(this.deviceInfo.serialNo);
       this.currentPosition = 100;
     } else {
-      this.sectorAlarm.lockDoor();
+      this.sectorAlarm.lockDoor(this.deviceInfo.serialNo);
       this.currentPosition = 0;
     }
   }

@@ -1,15 +1,21 @@
 import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
 import { SectorPlatform } from './platform';
+import { Temperature } from './interfaces/Sector';
+import { SectorAlarm } from './sector';
+import { Device } from './interfaces/Device';
 
 export class TemperatureAccessory {
   private service: Service;
+  private deviceInfo: Device;
   private currentTemperature: CharacteristicValue = 0;
 
   constructor(
     private readonly platform: SectorPlatform,
     private readonly accessory: PlatformAccessory,
+    private sectorAlarm: SectorAlarm,
   ) {
-
+    this.deviceInfo = accessory.context.device;
+    // this.platform.log.info(`Device info: ${deviceInfo['serialNo']}`);
     // set accessory information
     this.accessory.getService(this.platform.Service.AccessoryInformation)!
       .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Tech-IT')
@@ -24,7 +30,12 @@ export class TemperatureAccessory {
 
   async getCurrentTemperature(): Promise<CharacteristicValue> {
     this.platform.log.info(`Get current position: ${this.currentTemperature}`);
-    this.currentTemperature = 30;
+    const temperature: Temperature | undefined = this.sectorAlarm.getTemperature(this.deviceInfo.serialNo);
+    if (temperature) {
+      this.currentTemperature = temperature.Temprature;
+    } else {
+      this.currentTemperature = 0;
+    }
     return this.currentTemperature;
   }
 }

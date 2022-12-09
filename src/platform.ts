@@ -42,31 +42,15 @@ export class SectorPlatform implements DynamicPlatformPlugin {
   }
 
   discoverDevices() {
-    const devices: Array<Device> = [
-      {
-        accessoryType: 'door',
-        uniqueId: 'sector-door',
-        displayName: 'MyFrontDoor',
-      },
-      {
-        accessoryType: 'temperature',
-        uniqueId: 'temperature1',
-        displayName: 'temperature1',
-      },
-      {
-        accessoryType: 'temperature',
-        uniqueId: 'temperature2',
-        displayName: 'temperature2',
-      },
-      {
-        accessoryType: 'security',
-        uniqueId: 'security',
-        displayName: 'myAlarm',
-      },
-    ];
+    const devices: Array<Device> = this.SectorAlarm.getDevices();
+    devices.push({
+      accessoryType: AccessoryType.SECURITY,
+      serialNo: '123456',
+      label: 'securitySystem',
+    });
 
     for (const device of devices) {
-      const uuid = this.api.hap.uuid.generate(device.uniqueId);
+      const uuid = this.api.hap.uuid.generate(device.serialNo);
       const existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid);
       // const removeAccessory = this.accessories.find(accessory => accessory.UUID === 'd27abbb8-bcbe-47ec-9b05-aa3a9e9f6744');
       // this.log.info(`Remove: ${removeAccessory?.displayName}`);
@@ -87,20 +71,20 @@ export class SectorPlatform implements DynamicPlatformPlugin {
         if (device.accessoryType === AccessoryType.DOOR) {
           new DoorAccessory(this, existingAccessory, this.SectorAlarm);
         } else if (device.accessoryType === AccessoryType.TEMPERATURE) {
-          new TemperatureAccessory(this, existingAccessory);
+          new TemperatureAccessory(this, existingAccessory, this.SectorAlarm);
         } else if (device.accessoryType === AccessoryType.SECURITY) {
           new SecuritySystemAccessory(this, existingAccessory);
         }
 
       } else {
-        this.log.info('Adding new accessory:', device.displayName);
-        const accessory = new this.api.platformAccessory(device.displayName, uuid);
+        this.log.info('Adding new accessory:', device.label);
+        const accessory = new this.api.platformAccessory(device.label, uuid);
         accessory.context.device = device;
 
         if (device.accessoryType === AccessoryType.DOOR) {
           new DoorAccessory(this, accessory, this.SectorAlarm);
         } else if (device.accessoryType === AccessoryType.TEMPERATURE) {
-          new TemperatureAccessory(this, accessory);
+          new TemperatureAccessory(this, accessory, this.SectorAlarm);
         } else if (device.accessoryType === AccessoryType.SECURITY) {
           new SecuritySystemAccessory(this, accessory);
         }

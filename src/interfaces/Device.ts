@@ -1,7 +1,13 @@
+// export interface Device {
+// 	accessoryType: string;
+// 	uniqueId: string;
+// 	displayName: string;
+// }
+
 export interface Device {
 	accessoryType: string;
-	uniqueId: string;
-	displayName: string;
+	serialNo: string;
+	label: string;
 }
 
 export enum AccessoryType {
