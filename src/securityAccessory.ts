@@ -1,4 +1,4 @@
-import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
+import {Service, PlatformAccessory, CharacteristicValue, Characteristic} from 'homebridge';
 import { SectorPlatform } from './platform';
 
 export class SecuritySystemAccessory {
@@ -61,6 +61,25 @@ export class SecuritySystemAccessory {
        */
   handleSecuritySystemTargetStateSet(value) {
     this.platform.log.info('Triggered SET SecuritySystemTargetState:', value);
+
+    switch(value) {
+      case this.platform.Characteristic.SecuritySystemTargetState.STAY_ARM:
+        // Activate alarm - Partial
+        this.platform.log.info('Activated alarm in partial mode');
+        break;
+      case this.platform.Characteristic.SecuritySystemTargetState.NIGHT_ARM:
+        // Activate alarm - Partial
+        this.platform.log.info('Activated alarm in partial mode');
+        break;
+      case this.platform.Characteristic.SecuritySystemTargetState.AWAY_ARM:
+        // Activate alarm - Armed
+        this.platform.log.info('Activated alarm in armed mode');
+        break;
+      case this.platform.Characteristic.SecuritySystemTargetState.DISARM:
+        // Deactivate alarm - Disarm
+        this.platform.log.info('Deactivate alarm');
+        break;
+    }
     this.currentState = value;
   }
 }

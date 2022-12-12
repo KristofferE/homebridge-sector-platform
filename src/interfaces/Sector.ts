@@ -76,3 +76,44 @@ export interface Panel {
 	Temperatures: Array<Temperature>;
 	Photos: [];
 }
+
+export enum SectorJob {
+	SUCCESS = 'success',
+	FAILED = 'failed',
+}
+
+export interface User {
+	UserId: number;
+	UserName: string;
+	FirstName: string;
+	LastName: string;
+	NationId: number;
+	Nationality: number;
+	UserCultureInfo: string;
+	CustomerNo: string;
+	CellPhone: string;
+	Brand: number;
+	IsEnterpriseCustomer: boolean;
+	NationHasCRM: boolean;
+	NationUserIRCam: boolean;
+	NationCanAddSmartPlug: boolean;
+	UpdatedTermsRequired: boolean;
+	Features: Array<string>;
+	UnreadMessages: number;
+	Impersonation: boolean;
+	ImpersonationUserName: Nullable<string>;
+	ImpersonationUserId: number;
+}
+
+export interface Resources {
+	CustomerServicePhone: string;
+	TermsUrl: string;
+	CustomerServiceUrl: string;
+}
+
+export interface LoginInfo {
+	AuthorizationToken: string;
+	User: User;
+	Resources: Resources;
+	DefaultPanelId: Nullable<number>;
+}

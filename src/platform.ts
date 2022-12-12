@@ -41,8 +41,8 @@ export class SectorPlatform implements DynamicPlatformPlugin {
     this.accessories.push(accessory);
   }
 
-  discoverDevices() {
-    const devices: Array<Device> = this.SectorAlarm.getDevices();
+  async discoverDevices() {
+    const devices: Array<Device> = await this.SectorAlarm.getDevices();
     devices.push({
       accessoryType: AccessoryType.SECURITY,
       serialNo: '123456',

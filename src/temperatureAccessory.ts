@@ -30,7 +30,7 @@ export class TemperatureAccessory {
 
   async getCurrentTemperature(): Promise<CharacteristicValue> {
     this.platform.log.info(`Get current position: ${this.currentTemperature}`);
-    const temperature: Temperature | undefined = this.sectorAlarm.getTemperature(this.deviceInfo.serialNo);
+    const temperature: Temperature | undefined = await this.sectorAlarm.getTemperature(this.deviceInfo.serialNo);
     if (temperature) {
       this.currentTemperature = temperature.Temprature;
     } else {

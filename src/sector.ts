@@ -1,6 +1,7 @@
-import fetch, { Headers } from 'sync-fetch';
+// import fetch, { Headers } from 'node-fetch';
+import axios, { AxiosHeaders } from 'axios';
 import * as jwt from 'jsonwebtoken';
-import { Sector, Temperature, Door } from './interfaces/Sector';
+import { Sector, Temperature, Door, SectorJob, LoginInfo } from './interfaces/Sector';
 import { Device, AccessoryType } from './interfaces/Device';
 
 export class SectorAlarm {
@@ -26,33 +27,57 @@ export class SectorAlarm {
     } else if (this.headers['Authorization']) {
       this.checkTokenValidity();
     }
-  }
-
-  private setHeaders(): void {
-    this.headers = {
-      'API-Version': '6',
-      'Platform': 'iOS',
-      'User-Agent': '  SectorAlarm/387 CFNetwork/1206 Darwin/20.1.0',
-      'Version': '2.0.27',
-      'Connection': 'keep-alive',
-      'Content-Type': 'application/json',
+    this.axiosConfig = {
+      headers: this.headers,
     };
   }
 
-  private getToken(): void {
+  private setHeaders(): void {
+    // this.headers = {
+    //   'API-Version': '6',
+    //   'Platform': 'iOS',
+    //   'User-Agent': '  SectorAlarm/387 CFNetwork/1206 Darwin/20.1.0',
+    //   'Version': '2.0.27',
+    //   'Connection': 'keep-alive',
+    //   'Content-Type': 'application/json',
+    // };
+    this.headers.set('API-Version', '6');
+    this.headers.set('Platform', 'iOS');
+    this.headers.set('User-Agent', 'SectorAlarm/387 CFNetwork/1206 Darwin/20.1.0');
+    this.headers.set('Version', '2.0.27');
+    this.headers.set('Connection', 'keep-alive');
+    this.headers.set('Content-Type', 'application/json');
+  }
+
+  private async getToken(): Promise<void> {
     const jsonData = {
       'UserId': this.userId,
       'Password': this.password,
     };
     const url = `${this.baseUrl}/api/Login/Login`;
-    const responseMessage = fetch(url, {
-      headers: this.headers,
-      method: 'POST',
-      body: JSON.stringify(jsonData),
-    });
+    // const responseMessage = await fetch(url, {
+    //   headers: this.headers,
+    //   method: 'POST',
+    //   body: JSON.stringify(jsonData),
+    // });
+    const responseMessage = await axios.post<LoginInfo>(
+      url,
+      JSON.stringify(jsonData),
+      this.axiosConfig,
+    )
+      .then(res => {
+        // return res.data;
+        this.headers.set('Authorization', res.data.AuthorizationToken);
+      })
+      .catch(error => {
+        console.log(`Went to shit: ${error}`);
+      })
+      .then(final => {
+        console.log(`Final: ${final}`);
+      });
 
-    const data = responseMessage.json();
-    this.headers['Authorization'] = data['AuthorizationToken'];
+    // const loginInfo = await responseMessage.json() as LoginInfo;
+    // this.headers['Authorization'] = responseMessage.AuthorizationToken;
   }
 
   private checkTokenValidity(): void {
@@ -67,14 +92,18 @@ export class SectorAlarm {
     }
   }
 
-  public getDevices(): Array<Device> {
+  public async getDevices(): Promise<Array<Device>> {
     const url = `${this.baseUrl}/api/Panel/GetPanel?${this.panelId}`;
-    const responseMessage = fetch(url, {
-      method: 'GET',
-      headers: this.headers,
-    });
+    // const responseMessage = await fetch(url, {
+    //   method: 'GET',
+    //   headers: this.headers,
+    // });
 
-    const sectorData = responseMessage.json();
+    // const sectorData = await responseMessage.json() as any;
+    const sectorData = await axios.get(url, this.axiosConfig)
+      .then(res => {
+        return res.data;
+      });
     const locks: Array<Door> = sectorData['Locks'];
     const temps: Array<Temperature> = sectorData['Temperatures'];
 
@@ -94,62 +123,117 @@ export class SectorAlarm {
     return devices;
   }
 
-  public getDoorState(serialNo: string): Door | undefined {
+  public async getDoorState(serialNo: string): Promise<Door | undefined> {
     const url = `${this.baseUrl}/api/Panel/GetLockStatus?panelId=${this.panelId}`;
-    const responseMessage = fetch(url, {
-      method: 'GET',
-      headers: this.headers,
-    });
-    const doorStates: Array<Door> = responseMessage.json();
-    const door: Door | undefined = doorStates.find(door => door.Serial === serialNo);
-    return door;
+    // const responseMessage = await fetch(url, {
+    //   method: 'GET',
+    //   headers: this.headers,
+    // });
+    // const doorStates: Array<Door> = await responseMessage.json() as Array<Door>;
+    const doorStates = await axios.get<Array<Door>>(url, this.axiosConfig)
+      .then(res => {
+        return res.data;
+      });
+    return doorStates.find(door => door.Serial === serialNo);
   }
 
-  public unlockDoor(serialNo: string): void {
+  public async unlockDoor(serialNo: string): Promise<SectorJob> {
     this.checkTokenValidity();
     const url = `${this.baseUrl}/api/Panel/Unlock`;
 
-    fetch(url, {
-      method: 'POST',
-      headers: this.headers,
+    // const responseMessage = await fetch(url, {
+    //   method: 'POST',
+    //   headers: this.headers,
 
-      body: JSON.stringify({
-        lockSerial: serialNo,
-        panelCode: this.panelCode,
-        panelId: this.panelId,
-        platform: this.platform,
-      }),
+    //   body: JSON.stringify({
+    //     lockSerial: serialNo,
+    //     panelCode: this.panelCode,
+    //     panelId: this.panelId,
+    //     platform: this.platform,
+    //   }),
 
-    });
+    // });
+    const responseMessage = await axios.post(url, JSON.stringify({
+      lockSerial: serialNo,
+      panelCode: this.panelCode,
+      panelId: this.panelId,
+      platform: this.platform,
+    }), this.axiosConfig);
+    return responseMessage.status === 204 ? SectorJob.SUCCESS : SectorJob.FAILED;
   }
 
-  public lockDoor(serialNo: string): void {
+  public async lockDoor(serialNo: string): Promise<SectorJob> {
     this.checkTokenValidity();
     const url = `${this.baseUrl}/api/Panel/Lock`;
 
-    fetch(url, {
-      method: 'POST',
-      headers: this.headers,
+    // const responseMessage = await fetch(url, {
+    //   method: 'POST',
+    //   headers: this.headers,
 
-      body: JSON.stringify({
-        lockSerial: serialNo,
-        panelCode: this.panelCode,
-        panelId: this.panelId,
-        platform: this.platform,
-      }),
+    //   body: JSON.stringify({
+    //     lockSerial: serialNo,
+    //     panelCode: this.panelCode,
+    //     panelId: this.panelId,
+    //     platform: this.platform,
+    //   }),
 
-    });
+    // });
+    const responseMessage = await axios.post(url, JSON.stringify({
+      lockSerial: serialNo,
+      panelCode: this.panelCode,
+      panelId: this.panelId,
+      platform: this.platform,
+    }), this.axiosConfig);
+
+    return responseMessage.status === 204 ? SectorJob.SUCCESS : SectorJob.FAILED;
   }
 
-  public getTemperature(serialNo: string): Temperature | undefined {
+  public async getTemperature(serialNo: string): Promise<Temperature | undefined> {
     this.checkTokenValidity();
     const url = `${this.baseUrl}/api/Panel/GetTemperatures?panelId=${this.panelId}`;
-    const responseMessage = fetch(url, {
-      method: 'GET',
-      headers: this.headers,
-    });
-    const temperatures: Array<Temperature> = responseMessage.json();
+    // const responseMessage = await fetch(url, {
+    //   method: 'GET',
+    //   headers: this.headers,
+    // });
+    // const temperatures: Array<Temperature> = await responseMessage.json() as Array<Temperature>;
+    const temperatures = await axios.get<Array<Temperature>>(url, this.axiosConfig)
+      .then(res => {
+        return res.data;
+      });
     const temp = temperatures.find(temp => temp.SerialNo === serialNo);
     return temp;
+  }
+
+  public async arm(): Promise<SectorJob> {
+    this.checkTokenValidity();
+    const url = `${this.baseUrl}/api/Panel/Arm`;
+    // const responseMessage = await fetch(url, {
+    //   method: 'POST',
+    //   headers: this.headers,
+    // });
+    const responseMessage = await axios.post(url, this.axiosConfig);
+    return responseMessage.status === 204 ? SectorJob.SUCCESS : SectorJob.FAILED;
+  }
+
+  public async partialArm(): Promise<SectorJob> {
+    this.checkTokenValidity();
+    const url = `${this.baseUrl}/api/Panel/PartialArm`;
+    // const responseMessage = await fetch(url, {
+    //   method: 'POST',
+    //   headers: this.headers,
+    // });
+    const responseMessage = await axios.post(url, this.axiosConfig);
+    return responseMessage.status === 204 ? SectorJob.SUCCESS : SectorJob.FAILED;
+  }
+
+  public async disarm(): Promise<SectorJob> {
+    this.checkTokenValidity();
+    const url = `${this.baseUrl}/api/Panel/Disarm`;
+    // const responseMessage = await fetch(url, {
+    //   method: 'POST',
+    //   headers: this.headers,
+    // });
+    const responseMessage = await axios.post(url, this.axiosConfig);
+    return responseMessage.status === 204 ? SectorJob.SUCCESS : SectorJob.FAILED;
   }
 }
