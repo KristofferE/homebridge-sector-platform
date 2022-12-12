@@ -5,7 +5,7 @@ import { Device, AccessoryType } from './interfaces/Device';
 
 export class SectorAlarm {
   private baseUrl = 'https://mypagesapi.sectoralarm.net';
-  private headers: Headers = new Headers();
+  private headers: any = new Headers();
   private userId: string;
   private password: string;
   // private lockSerial: string; // Retreived by system automatically
