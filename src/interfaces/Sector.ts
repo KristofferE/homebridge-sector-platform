@@ -8,6 +8,18 @@ export interface Sector {
 	panelId: string;
 }
 
+export interface Panel {
+	PanelId: number;
+	DisplayName: string;
+	LegalOwnerName: string;
+	AccessGroup: number;
+	Status: number;
+	InstallationStatus: number;
+	IsDefaultPanel: boolean;
+	PanelTime: string;
+	Capabilities: Array<string>;
+}
+
 export interface Temperature {
 	Id: string;
 	Label: string;
@@ -29,6 +41,12 @@ export interface Door {
 export enum DoorStatus {
 	OPEN = 'unlock',
 	CLOSED = 'lock'
+}
+
+export enum AlarmStatus {
+	DISARMED = 1,
+	ARMED = 2,
+	PARTIALARMED = 3,
 }
 
 export interface PropertyContact {
