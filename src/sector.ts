@@ -2,10 +2,11 @@ import axios from 'axios';
 import * as jwt from 'jsonwebtoken';
 import { Sector, Temperature, Door, SectorJob, LoginInfo, Panel, AlarmStatus, PanelStatus } from './interfaces/Sector';
 import { Device, AccessoryType } from './interfaces/Device';
-import { PlatformConfig } from 'homebridge';
+import { PlatformConfig, Logger } from 'homebridge';
 
 
 export class SectorAlarm {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private headers: any;
   private baseUrl = 'https://mypagesapi.sectoralarm.net';
   private userId: string;
@@ -14,13 +15,15 @@ export class SectorAlarm {
   private panelId: string;
   private platform = 'web';
   private platformConfig: PlatformConfig;
+  private log: Logger;
 
-  constructor(sectorConfig: Sector, config: PlatformConfig) {
+  constructor(sectorConfig: Sector, config: PlatformConfig, log: Logger) {
     this.userId = sectorConfig.userId;
     this.password = sectorConfig.password;
     this.panelCode = sectorConfig.panelCode;
     this.panelId = sectorConfig.panelId;
     this.platformConfig = config;
+    this.log = log;
   }
 
   private setHeaders(): void {
@@ -62,10 +65,7 @@ export class SectorAlarm {
         this.headers['Authorization'] = res.data.AuthorizationToken;
       })
       .catch(error => {
-        console.log(`Went to shit: ${error}`);
-      })
-      .then(final => {
-        console.log(`Final: ${final}`);
+        this.log.error(error);
       });
   }
 
@@ -97,7 +97,7 @@ export class SectorAlarm {
         return res.data;
       })
       .catch(error => {
-        console.log(`Error: ${error}`);
+        this.log.error(error);
       });
     const locks: Array<Door> = sectorData['Locks'];
     const temps: Array<Temperature> = sectorData['Temperatures'];
@@ -178,16 +178,16 @@ export class SectorAlarm {
   public async arm(): Promise<SectorJob> {
     this.checkTokenValidity();
     const url = `${this.baseUrl}/api/Panel/Arm`;
-    // const responseMessage = await axios.post(url, { headers: this.headers });
-    // return responseMessage.status === 204 ? SectorJob.SUCCESS : SectorJob.FAILED;
+    const responseMessage = await axios.post(url, { headers: this.headers });
+    return responseMessage.status === 204 ? SectorJob.SUCCESS : SectorJob.FAILED;
     return SectorJob.SUCCESS;
   }
 
   public async partialArm(): Promise<SectorJob> {
     this.checkTokenValidity();
     const url = `${this.baseUrl}/api/Panel/PartialArm`;
-    // const responseMessage = await axios.post(url, { headers: this.headers });
-    // return responseMessage.status === 204 ? SectorJob.SUCCESS : SectorJob.FAILED;
+    const responseMessage = await axios.post(url, { headers: this.headers });
+    return responseMessage.status === 204 ? SectorJob.SUCCESS : SectorJob.FAILED;
     return SectorJob.SUCCESS;
   }
 

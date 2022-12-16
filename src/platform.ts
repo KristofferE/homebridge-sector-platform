@@ -28,7 +28,7 @@ export class SectorPlatform implements DynamicPlatformPlugin {
       lockSerial: config.lockSerial,
       panelCode: config.panelCode,
       panelId: config.panelId,
-    }, config);
+    }, config, this.log);
 
     this.api.on('didFinishLaunching', () => {
       log.debug('Executed didFinishLaunching callback');
