@@ -28,7 +28,7 @@ export class SectorPlatform implements DynamicPlatformPlugin {
       lockSerial: config.lockSerial,
       panelCode: config.panelCode,
       panelId: config.panelId,
-    });
+    }, config);
 
     this.api.on('didFinishLaunching', () => {
       log.debug('Executed didFinishLaunching callback');
@@ -74,7 +74,7 @@ export class SectorPlatform implements DynamicPlatformPlugin {
         } else if (device.accessoryType === AccessoryType.TEMPERATURE) {
           new TemperatureAccessory(this, existingAccessory, this.SectorAlarm);
         } else if (device.accessoryType === AccessoryType.SECURITY) {
-          new SecuritySystemAccessory(this, existingAccessory);
+          new SecuritySystemAccessory(this, existingAccessory, this.SectorAlarm);
         }
 
       } else {
@@ -87,7 +87,7 @@ export class SectorPlatform implements DynamicPlatformPlugin {
         } else if (device.accessoryType === AccessoryType.TEMPERATURE) {
           new TemperatureAccessory(this, accessory, this.SectorAlarm);
         } else if (device.accessoryType === AccessoryType.SECURITY) {
-          new SecuritySystemAccessory(this, accessory);
+          new SecuritySystemAccessory(this, accessory, this.SectorAlarm);
         }
         this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
       }

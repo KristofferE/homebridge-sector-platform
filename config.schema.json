@@ -40,6 +40,13 @@
         "type": "string",
         "required": true,
         "default": ""
+      },
+      "showTemperatures": {
+        "title": "Show Temperatures",
+        "description": "Might slow down that platform if true",
+        "type": "boolean",
+        "required": true,
+        "default": false
       }
     }
   }

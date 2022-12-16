@@ -2,6 +2,8 @@ import axios from 'axios';
 import * as jwt from 'jsonwebtoken';
 import { Sector, Temperature, Door, SectorJob, LoginInfo, Panel, AlarmStatus } from './interfaces/Sector';
 import { Device, AccessoryType } from './interfaces/Device';
+import { PlatformConfig } from 'homebridge';
+
 
 export class SectorAlarm {
   private headers: any;
@@ -12,13 +14,15 @@ export class SectorAlarm {
   private panelCode: string;
   private panelId: string;
   private platform = 'web';
+  private platformConfig: PlatformConfig;
 
-  constructor(sectorConfig: Sector) {
+  constructor(sectorConfig: Sector, config: PlatformConfig) {
     this.userId = sectorConfig.userId;
     this.password = sectorConfig.password;
     // this.lockSerial = sectorConfig.lockSerial;
     this.panelCode = sectorConfig.panelCode;
     this.panelId = sectorConfig.panelId;
+    this.platformConfig = config;
   }
 
   private setHeaders(): void {
@@ -107,11 +111,13 @@ export class SectorAlarm {
       label: lock.Label,
     }));
 
+    if (this.platformConfig.showTemperatures) {
     temps.map(temp => devices.push({
       accessoryType: AccessoryType.TEMPERATURE,
       serialNo: temp.SerialNo,
       label: temp.Label,
     }));
+    }
 
     return devices;
   }
