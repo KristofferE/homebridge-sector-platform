@@ -1,15 +1,21 @@
 import {Service, PlatformAccessory, CharacteristicValue, Characteristic} from 'homebridge';
+import { AlarmStatus } from './interfaces/Sector';
 import { SectorPlatform } from './platform';
+import { SectorAlarm } from './sector';
 
 export class SecuritySystemAccessory {
   private service: Service;
-  private currentState: CharacteristicValue;
+  private currentState: CharacteristicValue =
+    this.platform.Characteristic.SecuritySystemCurrentState.DISARMED;
+
+  private targetState: CharacteristicValue | undefined;
 
   constructor(
     private readonly platform: SectorPlatform,
     private readonly accessory: PlatformAccessory,
+    private readonly sectorAlarm: SectorAlarm,
   ) {
-    this.currentState = this.handleSecuritySystemCurrentStateGet();
+    // this.currentState = this.handleSecuritySystemCurrentStateGet();
     // set accessory information
     this.accessory.getService(this.platform.Service.AccessoryInformation)!
       .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Tech-IT')
@@ -33,14 +39,24 @@ export class SecuritySystemAccessory {
   /**
    * Handle requests to get the current value of the "Security System Current State" characteristic
    */
-  handleSecuritySystemCurrentStateGet() {
+  async handleSecuritySystemCurrentStateGet() {
     this.platform.log.info('Triggered GET SecuritySystemCurrentState');
+    const alarmState: AlarmStatus = await this.sectorAlarm.getAlarmState();
+    switch(alarmState) {
+      case AlarmStatus.ARMED:
+        this.currentState = this.platform.Characteristic.SecuritySystemCurrentState.AWAY_ARM;
+        break;
 
-    // set this to a valid value for SecuritySystemCurrentState
-    const currentValue = this.platform.Characteristic.SecuritySystemCurrentState.STAY_ARM;
-    this.currentState = currentValue;
+      case AlarmStatus.PARTIALARMED:
+        this.currentState = this.platform.Characteristic.SecuritySystemCurrentState.STAY_ARM;
+        break;
 
-    return currentValue;
+      case AlarmStatus.DISARMED || AlarmStatus.UNAVAILABLE:
+        this.currentState = this.platform.Characteristic.SecuritySystemCurrentState.DISARMED;
+        break;
+    }
+
+    return this.currentState;
   }
 
 
@@ -49,34 +65,34 @@ export class SecuritySystemAccessory {
        */
   handleSecuritySystemTargetStateGet() {
     this.platform.log.info('Triggered GET SecuritySystemTargetState');
-
-    // set this to a valid value for SecuritySystemTargetState
-    const currentValue = this.platform.Characteristic.SecuritySystemTargetState.STAY_ARM;
-
-    return currentValue;
+    return this.targetState !== undefined ? this.targetState : this.currentState;
   }
 
   /**
        * Handle requests to set the "Security System Target State" characteristic
        */
-  handleSecuritySystemTargetStateSet(value) {
+  async handleSecuritySystemTargetStateSet(value) {
     this.platform.log.info('Triggered SET SecuritySystemTargetState:', value);
 
     switch(value) {
       case this.platform.Characteristic.SecuritySystemTargetState.STAY_ARM:
         // Activate alarm - Partial
+        // await this.sectorAlarm.partialArm();
         this.platform.log.info('Activated alarm in partial mode');
         break;
       case this.platform.Characteristic.SecuritySystemTargetState.NIGHT_ARM:
         // Activate alarm - Partial
+        // await this.sectorAlarm.partialArm();
         this.platform.log.info('Activated alarm in partial mode');
         break;
       case this.platform.Characteristic.SecuritySystemTargetState.AWAY_ARM:
         // Activate alarm - Armed
+        // await this.sectorAlarm.arm();
         this.platform.log.info('Activated alarm in armed mode');
         break;
       case this.platform.Characteristic.SecuritySystemTargetState.DISARM:
         // Deactivate alarm - Disarm
+        // await this.sectorAlarm.disarm();
         this.platform.log.info('Deactivate alarm');
         break;
     }

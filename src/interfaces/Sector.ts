@@ -20,6 +20,13 @@ export interface Panel {
 	Capabilities: Array<string>;
 }
 
+export interface PanelStatus {
+	IsOnline: boolean;
+	StatusTime: string;
+	Status: AlarmStatus;
+	AnnexStatus: AlarmStatus;
+}
+
 export interface Temperature {
 	Id: string;
 	Label: string;
@@ -44,9 +51,10 @@ export enum DoorStatus {
 }
 
 export enum AlarmStatus {
+	UNAVAILABLE = 0,
 	DISARMED = 1,
-	ARMED = 2,
-	PARTIALARMED = 3,
+	PARTIALARMED = 2,
+	ARMED = 3,
 }
 
 export interface PropertyContact {
@@ -77,7 +85,7 @@ export interface Panel {
 	CanChangeInstallationDate: boolean;
 	ArcVideoConsent: Nullable<boolean>;
 	WizardStep: boolean;
-	PanelId: string;
+	PanelId: number;
 	DisplayName: string;
 	InstallationAddress: Nullable<string>;
 	InstallationStatus: number;

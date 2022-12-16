@@ -1,6 +1,6 @@
 import axios from 'axios';
 import * as jwt from 'jsonwebtoken';
-import { Sector, Temperature, Door, SectorJob, LoginInfo, Panel, AlarmStatus } from './interfaces/Sector';
+import { Sector, Temperature, Door, SectorJob, LoginInfo, Panel, AlarmStatus, PanelStatus } from './interfaces/Sector';
 import { Device, AccessoryType } from './interfaces/Device';
 import { PlatformConfig } from 'homebridge';
 
@@ -10,7 +10,6 @@ export class SectorAlarm {
   private baseUrl = 'https://mypagesapi.sectoralarm.net';
   private userId: string;
   private password: string;
-  // private lockSerial: string; // Retreived by system automatically
   private panelCode: string;
   private panelId: string;
   private platform = 'web';
@@ -19,7 +18,6 @@ export class SectorAlarm {
   constructor(sectorConfig: Sector, config: PlatformConfig) {
     this.userId = sectorConfig.userId;
     this.password = sectorConfig.password;
-    // this.lockSerial = sectorConfig.lockSerial;
     this.panelCode = sectorConfig.panelCode;
     this.panelId = sectorConfig.panelId;
     this.platformConfig = config;
@@ -53,7 +51,7 @@ export class SectorAlarm {
       'Password': this.password,
     };
     const url = `${this.baseUrl}/api/Login/Login`;
-    const responseMessage = await axios.post<LoginInfo>(
+    await axios.post<LoginInfo>(
       url,
       JSON.stringify(jsonData),
       {
@@ -112,11 +110,11 @@ export class SectorAlarm {
     }));
 
     if (this.platformConfig.showTemperatures) {
-    temps.map(temp => devices.push({
-      accessoryType: AccessoryType.TEMPERATURE,
-      serialNo: temp.SerialNo,
-      label: temp.Label,
-    }));
+      temps.map(temp => devices.push({
+        accessoryType: AccessoryType.TEMPERATURE,
+        serialNo: temp.SerialNo,
+        label: temp.Label,
+      }));
     }
 
     return devices;
@@ -168,22 +166,29 @@ export class SectorAlarm {
   }
 
   public async getAlarmState(): Promise<AlarmStatus> {
-    // Retreive alarm status here...
-    return AlarmStatus.DISARMED;
+    this.checkTokenValidity();
+    const url = `${this.baseUrl}/api/Panel/GetPanelStatus?panelId=${this.panelId}`;
+    const panelStatus: PanelStatus = await axios.get<PanelStatus>(url, { headers: this.headers })
+      .then(res => {
+        return res.data;
+      });
+    return panelStatus.Status;
   }
 
   public async arm(): Promise<SectorJob> {
     this.checkTokenValidity();
     const url = `${this.baseUrl}/api/Panel/Arm`;
-    const responseMessage = await axios.post(url, { headers: this.headers });
-    return responseMessage.status === 204 ? SectorJob.SUCCESS : SectorJob.FAILED;
+    // const responseMessage = await axios.post(url, { headers: this.headers });
+    // return responseMessage.status === 204 ? SectorJob.SUCCESS : SectorJob.FAILED;
+    return SectorJob.SUCCESS;
   }
 
   public async partialArm(): Promise<SectorJob> {
     this.checkTokenValidity();
     const url = `${this.baseUrl}/api/Panel/PartialArm`;
-    const responseMessage = await axios.post(url, { headers: this.headers });
-    return responseMessage.status === 204 ? SectorJob.SUCCESS : SectorJob.FAILED;
+    // const responseMessage = await axios.post(url, { headers: this.headers });
+    // return responseMessage.status === 204 ? SectorJob.SUCCESS : SectorJob.FAILED;
+    return SectorJob.SUCCESS;
   }
 
   public async disarm(): Promise<SectorJob> {
