@@ -25,7 +25,6 @@ export class SectorPlatform implements DynamicPlatformPlugin {
     this.SectorAlarm = new SectorAlarm({
       userId: config.userId,
       password: config.password,
-      lockSerial: config.lockSerial,
       panelCode: config.panelCode,
       panelId: config.panelId,
     }, config, this.log);
@@ -44,11 +43,12 @@ export class SectorPlatform implements DynamicPlatformPlugin {
   async discoverDevices() {
     await this.SectorAlarm.init();
     const devices: Array<Device> = await this.SectorAlarm.getDevices();
-    devices.push({
-      accessoryType: AccessoryType.SECURITY,
-      serialNo: '123456',
-      label: 'securitySystem',
-    });
+    this.log.info(`Loaded devices: ${devices.length}`);
+    // devices.push({
+    //   accessoryType: AccessoryType.SECURITY,
+    //   serialNo: '123456',
+    //   label: 'securitySystem',
+    // });
 
     for (const device of devices) {
       const uuid = this.api.hap.uuid.generate(device.serialNo);
