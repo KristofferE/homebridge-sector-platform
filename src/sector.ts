@@ -91,32 +91,42 @@ export class SectorAlarm {
   }
 
   public async getDevices(): Promise<Array<Device>> {
-    const url = `${this.baseUrl}/api/Panel/GetPanel?${this.panelId}`;
-    const sectorData = await axios.get(url, { headers: this.headers })
-      .then(res => {
-        return res.data;
-      })
-      .catch(error => {
-        this.log.error(error);
-      });
-    const locks: Array<Door> = sectorData['Locks'];
-    const temps: Array<Temperature> = sectorData['Temperatures'];
-
+    const panels: Array<Panel> = await this.getPanels();
     const devices: Array<Device> = new Array<Device>();
-    locks.map(lock => devices.push({
-      accessoryType: AccessoryType.DOOR,
-      serialNo: lock.Serial,
-      label: lock.Label,
-    }));
+    panels.map(panel => {
+      const url = `${this.baseUrl}/api/Panel/GetPanel?${panel.PanelId}`;
+      axios.get<Panel>(url, { headers: this.headers })
+        .then(res => {
+          this.log.info(url, JSON.stringify(res.data));
+          this.mapDevices(res.data).map(device => {
+            devices.push(device);
+          });
+        });
+    });
+    this.log.info(`Sector devices: ${devices.length}`);
 
-    if (this.platformConfig.showTemperatures) {
-      temps.map(temp => devices.push({
-        accessoryType: AccessoryType.TEMPERATURE,
-        serialNo: temp.SerialNo,
-        label: temp.Label,
-      }));
+    return devices;
+  }
+
+  private mapDevices(panelData: Panel): Array<Device> {
+    const devices: Array<Device> = new Array<Device>();
+    panelData.Locks.map(lock => {
+      devices.push({
+        accessoryType: AccessoryType.DOOR,
+        serialNo: lock.Serial,
+        label: `${panelData.DisplayName} - ${lock.Label}`,
+      });
+    });
+
+    if (!this.platformConfig.showTemperature) {
+      panelData.Temperatures.map(temp => {
+        devices.push({
+          accessoryType: AccessoryType.TEMPERATURE,
+          serialNo: temp.SerialNo,
+          label:  `${panelData.DisplayName} - ${temp.Label}`,
+        });
+      });
     }
-
     return devices;
   }
 
