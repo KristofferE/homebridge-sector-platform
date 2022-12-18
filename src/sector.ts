@@ -92,25 +92,28 @@ export class SectorAlarm {
 
   public async getDevices(): Promise<Array<Device>> {
     const url = `${this.baseUrl}/api/Panel/GetPanel?${this.panelId}`;
-    const sectorData = await axios.get(url, { headers: this.headers })
+    const devices: Array<Device> = new Array<Device>();
+    await axios.get(url, { headers: this.headers })
       .then(res => {
-        return res.data;
+        this.mapDevices(res.data).map(device => devices.push(device));
       })
       .catch(error => {
         this.log.error(error);
       });
-    const locks: Array<Door> = sectorData['Locks'];
-    const temps: Array<Temperature> = sectorData['Temperatures'];
 
+    return devices;
+  }
+
+  public mapDevices(panelData: Panel): Array<Device> {
     const devices: Array<Device> = new Array<Device>();
-    locks.map(lock => devices.push({
+    panelData.Locks.map(lock => devices.push({
       accessoryType: AccessoryType.DOOR,
       serialNo: lock.Serial,
       label: lock.Label,
     }));
 
     if (this.platformConfig.showTemperatures) {
-      temps.map(temp => devices.push({
+      panelData.Temperatures.map(temp => devices.push({
         accessoryType: AccessoryType.TEMPERATURE,
         serialNo: temp.SerialNo,
         label: temp.Label,
