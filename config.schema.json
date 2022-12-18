@@ -9,7 +9,7 @@
         "title": "Name",
         "type": "string",
         "required": true,
-        "default": "Example Dynamic Platform"
+        "default": "SectorAlarm Platform"
       },
       "userId": {
         "title": "UserId",
@@ -21,25 +21,19 @@
         "title": "Password",
         "type": "string",
         "required": true,
-        "default": ""
-      },
-      "lockSerial": {
-        "title": "Lock Serial",
-        "type": "string",
-        "required": true,
-        "default": ""
+        "default": "*****"
       },
       "panelCode": {
         "title": "Panel Code",
         "type": "string",
         "required": true,
-        "default": ""
+        "default": "1234"
       },
       "panelId": {
         "title": "PanelId",
         "type": "string",
         "required": true,
-        "default": ""
+        "default": "1234567"
       },
       "showTemperatures": {
         "title": "Show Temperatures",
