@@ -42,8 +42,10 @@ export class DoorAccessory {
 
     if (lock) {
       if (lock.Status === DoorStatus.OPEN) {
+        this.service.updateCharacteristic(this.platform.Characteristic.CurrentPosition, 100);
         this.currentPosition = 100;
       } else {
+        this.service.updateCharacteristic(this.platform.Characteristic.CurrentPosition, 0);
         this.currentPosition = 0;
       }
     }
