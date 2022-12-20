@@ -65,19 +65,19 @@ export class SecuritySystemAccessory {
     switch (value) {
       case this.platform.Characteristic.SecuritySystemTargetState.STAY_ARM:
         await this.sectorAlarm.partialArm();
-        this.platform.log.info('Activated alarm in partial mode');
+        this.platform.log.debug('Activated alarm in partial mode');
         break;
       case this.platform.Characteristic.SecuritySystemTargetState.NIGHT_ARM:
         await this.sectorAlarm.partialArm();
-        this.platform.log.info('Activated alarm in partial mode');
+        this.platform.log.debug('Activated alarm in partial mode');
         break;
       case this.platform.Characteristic.SecuritySystemTargetState.AWAY_ARM:
         await this.sectorAlarm.arm();
-        this.platform.log.info('Activated alarm in armed mode');
+        this.platform.log.debug('Activated alarm in armed mode');
         break;
       case this.platform.Characteristic.SecuritySystemTargetState.DISARM:
         await this.sectorAlarm.disarm();
-        this.platform.log.info('Deactivate alarm');
+        this.platform.log.debug('Deactivate alarm');
         break;
     }
     this.currentState = value;
