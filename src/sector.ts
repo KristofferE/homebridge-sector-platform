@@ -183,7 +183,6 @@ export class SectorAlarm {
     const url = `${this.baseUrl}/api/Panel/Arm`;
     const responseMessage = await axios.post(url, { headers: this.headers });
     return responseMessage.status === 204 ? SectorJob.SUCCESS : SectorJob.FAILED;
-    return SectorJob.SUCCESS;
   }
 
   public async partialArm(): Promise<SectorJob> {
@@ -191,7 +190,6 @@ export class SectorAlarm {
     const url = `${this.baseUrl}/api/Panel/PartialArm`;
     const responseMessage = await axios.post(url, { headers: this.headers });
     return responseMessage.status === 204 ? SectorJob.SUCCESS : SectorJob.FAILED;
-    return SectorJob.SUCCESS;
   }
 
   public async disarm(): Promise<SectorJob> {
