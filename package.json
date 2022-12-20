@@ -2,7 +2,7 @@
   "private": false,
   "displayName": "Sector Alarm Plugin",
   "name": "@kristoffere/homebridge-sector-plugin",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Homebridge plugin to handle interaction with Sector Alarm.",
   "license": "Apache-2.0",
   "repository": {
