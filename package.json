@@ -24,8 +24,11 @@
     "prepublishOnly": "npm run lint && npm run build"
   },
   "keywords": [
+    "homebridge",
     "homebridge-plugin",
-    "sector-alarm"
+    "sector-alarm",
+    "sector",
+    "alarm"
   ],
   "dependencies": {
     "@types/node-fetch": "^2.6.2",
