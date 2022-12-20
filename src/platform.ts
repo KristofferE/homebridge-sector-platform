@@ -44,27 +44,10 @@ export class SectorPlatform implements DynamicPlatformPlugin {
     await this.SectorAlarm.init();
     const devices: Array<Device> = await this.SectorAlarm.getDevices();
     this.log.info(`Loaded devices: ${devices.length}`);
-    // devices.push({
-    //   accessoryType: AccessoryType.SECURITY,
-    //   serialNo: '123456',
-    //   label: 'securitySystem',
-    // });
 
     for (const device of devices) {
       const uuid = this.api.hap.uuid.generate(device.serialNo);
       const existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid);
-      // const removeAccessory = this.accessories.find(accessory => accessory.UUID === 'd27abbb8-bcbe-47ec-9b05-aa3a9e9f6744');
-      // this.log.info(`Remove: ${removeAccessory?.displayName}`);
-
-      // if (removeAccessory) {
-
-      //   // it is possible to remove platform accessories at any time using `api.unregisterPlatformAccessories`, eg.:
-      //   // remove platform accessories when no longer present
-      //   if (removeAccessory.UUID === 'd27abbb8-bcbe-47ec-9b05-aa3a9e9f6744') {
-      //     this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [removeAccessory]);
-      //   }
-      //   // this.log.info('Removing existing accessory from cache:', existingAccessory.displayName);
-      // }
 
       if (existingAccessory) {
         this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);

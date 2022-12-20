@@ -17,7 +17,6 @@ export class DoorAccessory {
     private readonly sectorAlarm: SectorAlarm,
   ) {
     this.deviceInfo = accessory.context.device;
-    // set accessory information
     this.accessory.getService(this.platform.Service.AccessoryInformation)!
       .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Tech-IT')
       .setCharacteristic(this.platform.Characteristic.Model, 'SectorAlarm-Door')
@@ -38,7 +37,7 @@ export class DoorAccessory {
   }
 
   async getCurrent(): Promise<CharacteristicValue> {
-    this.platform.log.info(`Get current position: ${this.currentPosition}`);
+    this.platform.log.debug(`Get current position: ${this.currentPosition}`);
     const lock: Door | undefined = await this.sectorAlarm.getDoorState(this.deviceInfo.serialNo);
 
     if (lock) {
@@ -52,7 +51,7 @@ export class DoorAccessory {
   }
 
   async getTarget(): Promise<CharacteristicValue> {
-    this.platform.log.info(`Get target position: ${this.wantedPosition}`);
+    this.platform.log.debug(`Get target position: ${this.wantedPosition}`);
     if (this.wantedPosition !== undefined) {
       return this.wantedPosition;
     } else {
@@ -61,24 +60,25 @@ export class DoorAccessory {
   }
 
   async setTarget(value: CharacteristicValue) {
-    this.platform.log.info(`Set target position: ${value}`);
+    this.platform.log.debug(`Set target position: ${value}`);
     if (value > 0) {
       const sectorJobState = await this.sectorAlarm.unlockDoor(this.deviceInfo.serialNo);
       if (sectorJobState === SectorJob.SUCCESS) {
+        this.currentPosition = 100;
         this.service.updateCharacteristic(this.platform.Characteristic.CurrentPosition, 100);
       } else {
+        this.currentPosition = 0;
         this.service.updateCharacteristic(this.platform.Characteristic.CurrentPosition, 0);
       }
-      // this.currentPosition = 100;
     } else {
       const sectorJobState = await this.sectorAlarm.lockDoor(this.deviceInfo.serialNo);
       if (sectorJobState === SectorJob.SUCCESS) {
-        this.service.updateCharacteristic(this.platform.Characteristic.CurrentPosition, 100);
-      } else {
+        this.currentPosition = 0;
         this.service.updateCharacteristic(this.platform.Characteristic.CurrentPosition, 0);
+      } else {
+        this.service.updateCharacteristic(this.platform.Characteristic.CurrentPosition, 100);
+        this.currentPosition = 100;
       }
-      // this.sectorAlarm.lockDoor(this.deviceInfo.serialNo);
-      // this.currentPosition = 0;
     }
   }
 }

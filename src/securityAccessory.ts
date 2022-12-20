@@ -1,4 +1,4 @@
-import {Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
+import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
 import { AlarmStatus } from './interfaces/Sector';
 import { SectorPlatform } from './platform';
 import { SectorAlarm } from './sector';
@@ -15,8 +15,6 @@ export class SecuritySystemAccessory {
     private readonly accessory: PlatformAccessory,
     private readonly sectorAlarm: SectorAlarm,
   ) {
-    // this.currentState = this.handleSecuritySystemCurrentStateGet();
-    // set accessory information
     this.accessory.getService(this.platform.Service.AccessoryInformation)!
       .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Tech-IT')
       .setCharacteristic(this.platform.Characteristic.Model, 'SectorAlarm-Security')
@@ -36,13 +34,10 @@ export class SecuritySystemAccessory {
     }, 10000);
   }
 
-  /**
-   * Handle requests to get the current value of the "Security System Current State" characteristic
-   */
   async handleSecuritySystemCurrentStateGet() {
-    this.platform.log.info('Triggered GET SecuritySystemCurrentState');
+    this.platform.log.debug('Triggered GET SecuritySystemCurrentState');
     const alarmState: AlarmStatus = await this.sectorAlarm.getAlarmState();
-    switch(alarmState) {
+    switch (alarmState) {
       case AlarmStatus.ARMED:
         this.currentState = this.platform.Characteristic.SecuritySystemCurrentState.AWAY_ARM;
         break;
@@ -59,22 +54,15 @@ export class SecuritySystemAccessory {
     return this.currentState;
   }
 
-
-  /**
-       * Handle requests to get the current value of the "Security System Target State" characteristic
-       */
   handleSecuritySystemTargetStateGet() {
-    this.platform.log.info('Triggered GET SecuritySystemTargetState');
+    this.platform.log.debug('Triggered GET SecuritySystemTargetState');
     return this.targetState !== undefined ? this.targetState : this.currentState;
   }
 
-  /**
-       * Handle requests to set the "Security System Target State" characteristic
-       */
   async handleSecuritySystemTargetStateSet(value) {
-    this.platform.log.info('Triggered SET SecuritySystemTargetState:', value);
+    this.platform.log.debug('Triggered SET SecuritySystemTargetState:', value);
 
-    switch(value) {
+    switch (value) {
       case this.platform.Characteristic.SecuritySystemTargetState.STAY_ARM:
         await this.sectorAlarm.partialArm();
         this.platform.log.info('Activated alarm in partial mode');

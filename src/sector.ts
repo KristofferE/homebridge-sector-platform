@@ -120,6 +120,12 @@ export class SectorAlarm {
       }));
     }
 
+    devices.push({
+      accessoryType: AccessoryType.SECURITY,
+      serialNo: '123456',
+      label: 'securitySystem',
+    });
+
     return devices;
   }
 

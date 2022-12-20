@@ -15,8 +15,6 @@ export class TemperatureAccessory {
     private sectorAlarm: SectorAlarm,
   ) {
     this.deviceInfo = accessory.context.device;
-    // this.platform.log.info(`Device info: ${deviceInfo['serialNo']}`);
-    // set accessory information
     this.accessory.getService(this.platform.Service.AccessoryInformation)!
       .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Tech-IT')
       .setCharacteristic(this.platform.Characteristic.Model, 'SectorAlarm-Temperature')
@@ -29,7 +27,7 @@ export class TemperatureAccessory {
   }
 
   async getCurrentTemperature(): Promise<CharacteristicValue> {
-    this.platform.log.info(`Get current position: ${this.currentTemperature}`);
+    this.platform.log.debug(`Get current position: ${this.currentTemperature}`);
     const temperature: Temperature | undefined = await this.sectorAlarm.getTemperature(this.deviceInfo.serialNo);
     if (temperature) {
       this.currentTemperature = temperature.Temprature;
