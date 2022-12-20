@@ -1,3 +1,6 @@
+# Unused files
+*/test.js
+
 # Ignore compiled code
 dist
 
