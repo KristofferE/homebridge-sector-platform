@@ -1,3 +1,4 @@
+[![Build and Lint](https://github.com/KristofferE/homebridge-sector-platform/actions/workflows/build.yml/badge.svg)](https://github.com/KristofferE/homebridge-sector-platform/actions/workflows/build.yml)
 
 <p align="center">
 
