@@ -41,6 +41,13 @@
         "type": "boolean",
         "required": true,
         "default": false
+      },
+      "updateInterval": {
+        "title": "Update interval",
+        "description": "How often to check for device state",
+        "type": "number",
+        "required": true,
+        "default": 60000
       }
     }
   }

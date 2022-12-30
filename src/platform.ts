@@ -1,4 +1,4 @@
-import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic } from 'homebridge';
+import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic, UnknownContext } from 'homebridge';
 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 import { DoorAccessory } from './doorAccessory';
@@ -40,6 +40,19 @@ export class SectorPlatform implements DynamicPlatformPlugin {
     this.accessories.push(accessory);
   }
 
+  createAccessory(device: Device, accessory: PlatformAccessory<UnknownContext>) {
+    switch (device.accessoryType) {
+      case AccessoryType.DOOR:
+        new DoorAccessory(this, accessory, this.SectorAlarm);
+        break;
+      case AccessoryType.TEMPERATURE:
+        new TemperatureAccessory(this, accessory, this.SectorAlarm);
+        break;
+      case AccessoryType.SECURITY:
+        new SecuritySystemAccessory(this, accessory, this.SectorAlarm);
+    }
+  }
+
   async discoverDevices() {
     await this.SectorAlarm.init();
     const devices: Array<Device> = await this.SectorAlarm.getDevices();
@@ -51,27 +64,12 @@ export class SectorPlatform implements DynamicPlatformPlugin {
 
       if (existingAccessory) {
         this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
-
-        if (device.accessoryType === AccessoryType.DOOR) {
-          new DoorAccessory(this, existingAccessory, this.SectorAlarm);
-        } else if (device.accessoryType === AccessoryType.TEMPERATURE) {
-          new TemperatureAccessory(this, existingAccessory, this.SectorAlarm);
-        } else if (device.accessoryType === AccessoryType.SECURITY) {
-          new SecuritySystemAccessory(this, existingAccessory, this.SectorAlarm);
-        }
-
+        this.createAccessory(device, existingAccessory);
       } else {
         this.log.info('Adding new accessory:', device.label);
         const accessory = new this.api.platformAccessory(device.label, uuid);
         accessory.context.device = device;
-
-        if (device.accessoryType === AccessoryType.DOOR) {
-          new DoorAccessory(this, accessory, this.SectorAlarm);
-        } else if (device.accessoryType === AccessoryType.TEMPERATURE) {
-          new TemperatureAccessory(this, accessory, this.SectorAlarm);
-        } else if (device.accessoryType === AccessoryType.SECURITY) {
-          new SecuritySystemAccessory(this, accessory, this.SectorAlarm);
-        }
+        this.createAccessory(device, accessory);
         this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
       }
     }

@@ -7,33 +7,34 @@ import { Device } from './interfaces/Device';
 export class TemperatureAccessory {
   private service: Service;
   private deviceInfo: Device;
-  private currentTemperature: CharacteristicValue = 0;
 
   constructor(
     private readonly platform: SectorPlatform,
     private readonly accessory: PlatformAccessory,
     private sectorAlarm: SectorAlarm,
   ) {
+    const { AccessoryInformation, TemperatureSensor } = this.platform.Service;
+    const { Manufacturer,
+      Model,
+      SerialNumber,
+      CurrentTemperature,
+    } = this.platform.Characteristic;
+
     this.deviceInfo = accessory.context.device;
-    this.accessory.getService(this.platform.Service.AccessoryInformation)!
-      .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Tech-IT')
-      .setCharacteristic(this.platform.Characteristic.Model, 'SectorAlarm-Temperature')
-      .setCharacteristic(this.platform.Characteristic.SerialNumber, '123456');
+    this.accessory.getService(AccessoryInformation)!
+      .setCharacteristic(Manufacturer, 'Tech-IT')
+      .setCharacteristic(Model, 'SectorAlarm-Temperature')
+      .setCharacteristic(SerialNumber, '123456');
 
     // eslint-disable-next-line max-len
-    this.service = this.accessory.getService(this.platform.Service.TemperatureSensor) || this.accessory.addService(this.platform.Service.TemperatureSensor);
-    this.service.getCharacteristic(this.platform.Characteristic.CurrentTemperature)
+    this.service = this.accessory.getService(TemperatureSensor) || this.accessory.addService(TemperatureSensor);
+    this.service.getCharacteristic(CurrentTemperature)
       .onGet(this.getCurrentTemperature.bind(this));
   }
 
   async getCurrentTemperature(): Promise<CharacteristicValue> {
-    this.platform.log.debug(`Get current position: ${this.currentTemperature}`);
     const temperature: Temperature | undefined = await this.sectorAlarm.getTemperature(this.deviceInfo.serialNo);
-    if (temperature) {
-      this.currentTemperature = temperature.Temprature;
-    } else {
-      this.currentTemperature = 0;
-    }
-    return this.currentTemperature;
+    this.platform.log.debug(`Get current position: ${temperature !== undefined ? temperature.Temprature : undefined}`);
+    return temperature ? temperature.Temprature : 0;
   }
 }
