@@ -35,10 +35,6 @@ export class TemperatureAccessory {
   async getCurrentTemperature(): Promise<CharacteristicValue> {
     const temperature: Temperature | undefined = await this.sectorAlarm.getTemperature(this.deviceInfo.serialNo);
     this.platform.log.debug(`Get current position: ${temperature !== undefined ? temperature.Temprature : undefined}`);
-    if (temperature) {
-      return temperature.Temprature;
-    } else {
-      return 0;
-    }
+    return temperature ? temperature.Temprature : 0;
   }
 }
