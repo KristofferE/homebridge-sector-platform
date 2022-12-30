@@ -2,7 +2,7 @@
   "private": false,
   "displayName": "Sector Alarm Plugin",
   "name": "@kristoffere/homebridge-sector-plugin",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Homebridge plugin to handle interaction with Sector Alarm.",
   "license": "Apache-2.0",
   "repository": {
@@ -31,13 +31,13 @@
     "alarm"
   ],
   "dependencies": {
-    "@types/node-fetch": "^2.6.2",
     "axios": "^1.2.1",
     "jsonwebtoken": "^8.5.1",
     "node-fetch": "^3.3.0"
   },
   "devDependencies": {
     "@types/node": "^16.18.8",
+    "@types/node-fetch": "^2.6.2",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^8.0.1",
