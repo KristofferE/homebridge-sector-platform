@@ -36,7 +36,7 @@ export class SecuritySystemAccessory {
 
     setInterval(async () => {
       this.service.updateCharacteristic(SecuritySystemCurrentState, await this.handleSecuritySystemCurrentStateGet());
-    }, 30000);
+    }, platform.config.updateInterval);
   }
 
   async handleSecuritySystemCurrentStateGet() {

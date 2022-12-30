@@ -42,7 +42,7 @@ export class DoorAccessory {
     setInterval(async () => {
       const { CurrentPosition } = this.platform.Characteristic;
       this.service.updateCharacteristic(CurrentPosition, await this.getCurrent());
-    }, 30000);
+    }, platform.config.updateInterval);
   }
 
   async getCurrent(): Promise<CharacteristicValue> {
